@@ -3,96 +3,72 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Post;
+use App\Models\User;
 
 class PostController extends Controller
 {
-    public $postsArray = [
-        [
-            'id' => 1,
-            'title' => 'Laravel',
-            'description' => 'hello laravel',
-            'posted_by' => 'Ahmed',
-            'created_at' => '2023-04-01 10:00:00',
-        ],
-
-        [
-            'id' => 2,
-            'title' => 'PHP',
-            'description' => 'hello php',
-            'posted_by' => 'Mohamed',
-            'created_at' => '2023-04-01 10:00:00',
-        ],
-
-        [
-            'id' => 3,
-            'title' => 'Javascript',
-            'description' => 'hello javascript',
-            'posted_by' => 'Mustafa',
-            'created_at' => '2023-04-01 10:00:00',
-        ],
-        [
-            'id' => 4,
-            'title' => 'C#',
-            'description' => 'hello C#',
-            'posted_by' => 'Youssef',
-            'created_at' => '2023-04-01 10:00:00',
-        ],
-    ];
 
     function index()
     {
 
         return view('post.index', [
-            'postsArray' => $this->postsArray,
+            'postsArray' => Post::orderBy("created_at", "desc")->paginate(10)
         ]);
     }
 
     function create()
     {
-        return view("post.create");
+        $usersArray = User::all();
+        return view("post.create", [
+            "usersArray" => $usersArray
+        ]);
     }
 
     function store()
     {
+        $post = new Post;
+        $post->title = request()->input("title");
+        $post->description = request()->input("description");
+
+        $post->posted_by = request()->input("posted_by");
+
+        $post->save();
         return redirect()->route("posts");
     }
 
     function show($id)
     {
-        $post = [
-            'id' => 4,
-            'title' => 'C#',
-            'description' => 'hello C#',
-            'posted_by' => 'Youssef',
-            'created_at' => '2023-04-01 10:00:00',
-        ];
-
+        $post = Post::find($id);
+        // dd($post);
         return view("post.show", [
-            "post" => $post
+            "post" => $post, "comments" => $post->comments
         ]);
     }
 
-    function edit()
+    function edit($id)
     {
-        $post = [
-            'id' => 4,
-            'title' => 'C#',
-            'description' => 'hello C#',
-            'posted_by' => 'Youssef',
-            'created_at' => '2023-04-01 10:00:00',
-        ];
+        $post = Post::find($id);
+        $usersArray = User::all();
         return view("post.edit", [
-            "post" => $post
+            "post" => $post,
+            "usersArray" => $usersArray
         ]);
     }
-    function update()
+    function update($id)
     {
+        Post::find($id)
+            ->update([
+                "title" => request()->input("title"),
+                "description" => request()->input("description"),
+                // "posted_by" => request()->input("posted_by")
+            ]);
         return redirect()->route("posts");
     }
 
-    function destroy()
+    function destroy($id)
     {
+        Post::find($id)->delete();
         return redirect()->route("posts");
     }
 }
