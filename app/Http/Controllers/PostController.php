@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\User;
+use Illuminate\Http\Request;
+use App\Http\Requests\StorePostRequest;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
@@ -25,7 +27,7 @@ class PostController extends Controller
         ]);
     }
 
-    function store()
+    function store(StorePostRequest $request)
     {
         $post = new Post;
         $post->title = request()->input("title");
@@ -34,6 +36,7 @@ class PostController extends Controller
         $post->posted_by = request()->input("posted_by");
 
         $post->save();
+
         return redirect()->route("posts");
     }
 
